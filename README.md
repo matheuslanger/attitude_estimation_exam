@@ -2,7 +2,7 @@
 This project receives a file with a timestamp as well as accelerometer values from each axis (x, y, z).
 The code utilizes this data to make calculations that can estimate the pitch and roll angles from a accelerometer and put the values in a new file.
 
-## How was it made
+## How it was made
 To make calculations by working with the data on the file, it was necessary to parse the information removing whitespaces and getting the data between semicolons,
 this was done using _stringstreams_ and converting it to int type.
 

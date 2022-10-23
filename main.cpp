@@ -20,36 +20,46 @@ public:
 
 };
 
+// Function that calculates the pitch angle
+double pitchEstimator(int x, int y, int z)
+{
+    return atan((x * (-1)) / (sqrt(pow(y, 2) + pow(z, 2))));
+}
+
+// Function that calculates the roll angle
+double rollEstimator(int x, int y, int z, int sign, double multiplier)
+{
+    return atan((y) / ((sign) * (sqrt(pow(z, 2) + (multiplier * pow(x, 2))))));
+}
+
 int main()
 {
     ifstream file;
 
     ofstream writeFile;
+    
+    int aX, aY, aZ, sign_Z;
 
-    int aX, aY, aZ;
-
-    int sign_z;
-
-    double pitch_est, roll_est;
+    double pitchEst, rollEst;
     double u = 0.01;
 
     // Open files
     file.open("attitude_exam.log");
+
+    // This file will be erased each time the code runs so that it can be overwritten
     writeFile.open("processed_data.log", ofstream::out | ofstream::trunc);
 
-    // Checks if the files opened
-    if (file.fail())
+
+
+
+    // Checks if the files opened successfully
+    if (file.fail() || writeFile.fail())
     {
         cout << "File failed to open." << endl;
         return 1;
     }
 
-    if (writeFile.fail())
-    {
-        cout << "File failed to open." << endl;
-        return 1;
-    }
-
+    // String that will receive the content of a line
     string line;
 
     do
@@ -60,7 +70,7 @@ int main()
 
         getline(file, line);
 
-        // Removes whitespaces from the lines
+        // Removes whitespaces from a line
         line.erase(remove_if(line.begin(), line.end(), ::isspace), line.end());
 
         // Parses the data from the file to a object
@@ -75,28 +85,27 @@ int main()
         aX = stoi(data.Acc_x);
         aY = stoi(data.Acc_y);
         aZ = stoi(data.Acc_z);
-        //writeFile << data.Timestamp << endl;
         }
         //Prevents invalid conversion from happening
         catch (const invalid_argument e) {}
         
         // Determines the value of the sign_z
         if(aZ >= 0)
-            sign_z = 1;
+            sign_Z = 1;
 
         else if(aZ < 0)
-            sign_z = -1;
+            sign_Z = -1;
 
         // Formula for the estimated roll
-        roll_est = atan((aX*(-1))/(sqrt(pow(aY,2) + pow(aZ,2))));
+        pitchEst = pitchEstimator(aX, aY, aZ);
 
         // Formula for the estimated pitch
-        pitch_est = atan((aY)/((sign_z)*(sqrt(pow(aZ, 2) + (u * pow(aX, 2))))));
+        rollEst = rollEstimator(aX, aY, aZ, sign_Z, u);
 
         // Prevents writing empty lines
         if(data.Timestamp != "")
         // Writes file with raw data separated by semicolons
-        writeFile <<data.Timestamp << ";" << roll_est << ";" << pitch_est << endl;
+        writeFile<< data.Timestamp << ";" << rollEst << ";" << pitchEst << endl;
 
     }
     // Stops when the code reaches the final line
